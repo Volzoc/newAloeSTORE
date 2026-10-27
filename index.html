@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AloeStore — Neon</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;900&display=swap');
+
+        :root {
+            --bg-dark: #030305;
+            --bg-card: rgba(20, 20, 35, 0.8);
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00a0;
+            --neon-purple: #8a2be2;
+            --text-main: #ffffff;
+            --text-muted: #8c8c9e;
+            --glow-blue: 0 0 20px rgba(0, 243, 255, 0.5);
+            --glow-pink: 0 0 20px rgba(255, 0, 160, 0.5);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 110px;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Декоративный фон */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -2;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: -20%; left: -10%; width: 70vw; height: 70vw;
+            background: radial-gradient(circle, rgba(255, 0, 160, 0.15) 0%, transparent 60%);
+            z-index: -1;
+            pointer-events: none;
+            animation: float 10s infinite alternate;
+        }
+        
+        .bg-glow-2 {
+            position: fixed;
+            bottom: -20%; right: -10%; width: 80vw; height: 80vw;
+            background: radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, transparent 60%);
+            z-index: -1;
+            pointer-events: none;
+            animation: float 12s infinite alternate-reverse;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 50px); }
+        }
+
+        /* Шапка */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255,0,160,0.3);
+            position: relative;
+        }
+        
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            box-shadow: 0 0 10px var(--neon-blue);
+            border-radius: 2px;
+        }
+
+        .header-icon {
+            font-size: 20px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        h1, h2, h3 { margin: 0 0 10px 0; font-weight: 900; letter-spacing: 1px; }
+        
+        .header-row { display: flex; align-items: center; margin-bottom: 10px; gap: 15px; }
+        .back-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;
+            color: var(--text-main); font-size: 20px; width: 44px; height: 44px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; padding: 0; transition: all 0.3s;
+        }
+        .back-btn:active { 
+            background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue);
+            transform: scale(0.9);
+        }
+
+        .title { 
+            font-size: 26px; text-transform: uppercase; line-height: 1.1;
+            color: var(--text-main); text-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+        .title span { color: var(--neon-pink); text-shadow: 0 0 15px var(--glow-pink); }
+        
+        .subtitle { 
+            font-size: 12px; color: var(--text-muted); margin-bottom: 25px; 
+            text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
+        }
+        .subtitle::before {
+            content: ''; display: block; width: 20px; height: 2px; background: var(--neon-blue);
+            box-shadow: 0 0 5px var(--neon-blue);
+        }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+        
+        /* Стильная обертка для иконки, чтобы она была видна на телефоне */
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.15), rgba(255, 0, 160, 0.15));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.05), 0 0 10px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+        }
+
+        .card .icon { 
+            font-size: 30px; 
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); 
+        }
+        
+        /* Эффект выбора */
+        .card.active, .list-item.active {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 25px var(--glow-blue), inset 0 0 20px rgba(0, 243, 255, 0.15);
+            background: rgba(0, 243, 255, 0.05);
+        }
+        .card.active .icon-wrapper {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border-color: #fff;
+            box-shadow: 0 0 20px var(--neon-blue);
+            transform: scale(1.1) rotate(5deg);
+        }
+        .card.active .icon {
+            filter: drop-shadow(0 0 10px #fff);
+        }
+
+        .list-item {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+            font-weight: 600;
+            font-size: 15px;
+            position: relative;
+        }
+        
+        .list-item:active, .list-item.active {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 20px var(--glow-pink), inset 0 0 15px rgba(255, 0, 160, 0.1);
+            background: rgba(255, 0, 160, 0.05);
+        }
+        
+        .hidden { display: none !important; }
+        
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(5, 5, 8, 0.85); backdrop-filter: blur(20px);
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid rgba(0, 243, 255, 0.2); 
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9), 0 -2px 10px rgba(0, 243, 255, 0.1); 
+            z-index: 100;
+        }
+        
+        .price-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;}
+        .price { 
+            font-size: 28px; font-weight: 900; color: var(--neon-blue); 
+            text-shadow: 0 0 15px var(--glow-blue); line-height: 1;
+        }
+        
+        button {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            color: #fff; border: none; padding: 15px 30px;
+            border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer;
+            transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            font-family: 'Montserrat', sans-serif;
+        }
+        button:active { transform: scale(0.92); box-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
+        button:disabled { 
+            background: rgba(255,255,255,0.05); color: #555; box-shadow: none; 
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        input, select {
+            width: 100%; padding: 18px; border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 15, 25, 0.8); color: white; font-size: 16px; box-sizing: border-box;
+            margin-bottom: 20px; outline: none; transition: all 0.3s; font-family: 'Montserrat', sans-serif;
+        }
+        input:focus, select:focus { 
+            border-color: var(--neon-blue); box-shadow: 0 0 20px var(--glow-blue); 
+            background: rgba(0, 243, 255, 0.05);
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) sepia(1) saturate(5) hue-rotate(150deg);
+            cursor: pointer; opacity: 0.9;
+        }
+        
+        select option { background: var(--bg-dark); color: var(--text-main); }
+        
+        .step { margin-bottom: 30px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0;}
+        
+        .addon-price { color: var(--neon-pink); font-weight: 800; text-shadow: 0 0 10px rgba(255,0,160,0.4);}
+        .zone-price { color: var(--neon-blue); font-size: 13px; font-weight: 600; margin-left: 10px; }
+
+        .corner-accent {
+            position: absolute; top: 20px; right: 20px;
+            width: 40px; height: 40px;
+            border-top: 2px solid var(--neon-pink); border-right: 2px solid var(--neon-pink);
+            border-radius: 0 12px 0 0; opacity: 0.3; pointer-events: none;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow-2"></div>
+
+    <div class="app-header">
+        <div class="logo">AloeSTORE</div>
+        <div class="header-icon">⚡</div>
+    </div>
+
+    <!-- Шаг 1: Устройство -->
+    <div id="step-device" class="step">
+        <div class="corner-accent"></div>
+        <div class="title">Что <span>оклеиваем?</span></div>
+        <div class="subtitle">Выберите девайс</div>
+        <div class="grid" id="device-grid">
+            <div class="card" onclick="selectDevice('Телефон', this)">
+                <div class="icon-wrapper"><span class="icon">📱</span></div>Телефон
+            </div>
+            <div class="card" onclick="selectDevice('Планшет', this)">
+                <div class="icon-wrapper"><span class="icon">📟</span></div>Планшет
+            </div>
+            <div class="card" onclick="selectDevice('Смарт-часы', this)">
+                <div class="icon-wrapper"><span class="icon">⌚</span></div>Часы
+            </div>
+            <div class="card" onclick="selectDevice('Ноутбук', this)">
+                <div class="icon-wrapper"><span class="icon">💻</span></div>Ноутбук
+            </div>
+            <div class="card" onclick="selectDevice('Прочее', this)">
+                <div class="icon-wrapper"><span class="icon">🔧</span></div>Прочее
+            </div>
+        </div>
+    </div>
+
+    <!-- Шаг 2: Модель -->
+    <div id="step-model" class="step hidden">
+        <div class="header-row">
+            <button class="back-btn" onclick="goBack(1)">←</button>
+            <div class="title">Ваша <span>модель</span></div>
+        </div>
+        <div class="subtitle">Введите модель для расчета</div>
+        <input type="text" id="model-input" placeholder="Например, iPhone 15 Pro" oninput="state.model = this.value">
+    </div>
+
+    <!-- Шаг 3: Зона -->
+    <div id="step-zone" class="step hidden">
+        <div class="header-row">
+            <button class="back-btn" onclick="goBack(2)">←</button>
+            <div class="title">Зона <span>оклейки</span></div>
+        </div>
+        <div class="subtitle">Что именно обрабатываем?</div>
+        <div id="zone-list"></div>
+    </div>
+
+    <!-- Шаг 3.5: Прочее -->
+    <div id="step-other-service" class="step hidden">
+        <div class="header-row">
+            <button class="back-btn" onclick="goBack(1)">←</button>
+            <div class="title">Услуга <span>Прочее</span></div>
+        </div>
+        <div class="subtitle">Что необходимо сделать?</div>
+        <div id="other-service-list"></div>
+    </div>
+
+    <!-- Шаг 4: Пленка -->
+    <div id="step-film" class="step hidden">
+        <div class="header-row">
+            <button class="back-btn" onclick="goBack(4)">←</button>
+            <div class="title">Выбор <span>пленки</span></div>
+        </div>
+        <div class="subtitle">Тип и толщина материала</div>
+        <div id="film-list"></div>
+        <div id="thickness-list" class="hidden" style="margin-top: 20px;">
+            <div class="subtitle">Толщина:</div>
+            <div id="thickness-container"></div>
+        </div>
+    </div>
+
+    <!-- Шаг 5: Доп услуги -->
+    <div id="step-addons" class="step hidden">
+        <div class="header-row">
+            <button class="back-btn" onclick="goBack(5)">←</button>
+            <div class="title">Доп <span>услуги</span></div>
+        </div>
+        <div class="subtitle">Сделайте девайс идеальным</div>
+        <div id="addons-list"></div>
+    </div>
+
+    <!-- Шаг 6: Дата, Время, Точка -->
+    <div id="step-datetime" class="step hidden">
+        <div class="header-row">
+            <button class="back-btn" onclick="goBack(6)">←</button>
+            <div class="title">Время и <span>точка</span></div>
+        </div>
+        <div class="subtitle">Когда вам удобно подойти?</div>
+        
+        <div class="subtitle" style="margin-bottom: 10px;">Дата:</div>
+        <input type="date" id="date-input" onchange="state.date = this.value">
+        
+        <div class="subtitle" style="margin-bottom: 10px;">Время:</div>
+        <input type="time" id="time-input" onchange="state.time = this.value">
+        
+        <div class="subtitle" style="margin-bottom: 10px;">Точка:</div>
+        <select id="point-input" onchange="state.point = this.value">
+            <option value="" disabled selected>Выберите точку...</option>
+            <option value="ТРЦ «СЕКРЕТ» (ул. Гагарина 65)">ТРЦ «СЕКРЕТ» (ул. Гагарина 65)</option>
+            <option value="ТРЦ «КОРОНА» (ул. Советская 200)">ТРЦ «КОРОНА» (ул. Советская 200)</option>
+        </select>
+    </div>
+
+    <!-- Шаг 7: Номер -->
+    <div id="step-phone" class="step hidden">
+        <div class="header-row">
+            <button class="back-btn" onclick="goBack(7)">←</button>
+            <div class="title">Почти <span>всё!</span></div>
+        </div>
+        <div class="subtitle">Оставьте номер для связи</div>
+        <input type="tel" id="phone-input" placeholder="+375 (XX) XXX-XX-XX" oninput="state.phone = this.value">
+    </div>
+
+    <div class="bottom-bar">
+        <div>
+            <div class="price-label">Итого:</div>
+            <div class="price" id="total-price">0 BYN</div>
+        </div>
+        <button id="next-btn" onclick="nextStep()">Далее</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#030305');
+
+        const BASE_PRICES = {
+            "Телефон": { "Экран": [35, 60], "Корпус": [50, 80], "Комплект": [80, 130] },
+            "Планшет": { "Экран": [75, 100], "Корпус": [80, 110], "Комплект": [150, 190] },
+            "Смарт-часы": { "Экран": [25, 40], "Корпус": [40, 60], "Комплект": [60, 80] },
+            "Ноутбук": { "Экран": [85, 120], "Верхняя крышка": [85, 120], "Нижняя крышка": [85, 120], "TouchPad": [40, 40], "Комплект": [280, 340] },
+            "Прочее": { 
+                "Автомультимедиа": [60, 60], "Торцы": [20, 40], "Линзы": [20, 20], "Кейс наушников": [45, 70]
+            }
+        };
+        
+        const ZONES = {
+            "Телефон": ["Экран", "Корпус", "Комплект"],
+            "Планшет": ["Экран", "Корпус", "Комплект"],
+            "Смарт-часы": ["Экран", "Корпус", "Комплект"],
+            "Ноутбук": ["Экран", "Верхняя крышка", "Нижняя крышка", "TouchPad", "Комплект"]
+        };
+        
+        const OTHER_SERVICES = [
+            { name: "Автомультимедиа", price: "от 60" },
+            { name: "Торцы", price: "20/40" },
+            { name: "Линзы", price: "20/20" },
+            { name: "Кейс наушников", price: "45/70" }
+        ];
+
+        let state = {
+            step: 1, device: null, model: null, zone: null, film: null, thickness: null, phone: null,
+            date: null, time: null, point: null,
+            basePrice: 0, addons: [], totalPrice: 0
+        };
+
+        function handleSelect(element, callback) {
+            const parent = element.parentElement;
+            Array.from(parent.children).forEach(child => child.classList.remove('active'));
+            element.classList.add('active');
+            setTimeout(callback, 150); 
+        }
+
+        function showStep(stepId, stepNumber) {
+            document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
+            const el = document.getElementById(stepId);
+            el.classList.remove('hidden');
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+            
+            state.step = stepNumber; 
+
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.innerText = "Далее";
+            nextBtn.disabled = false;
+
+            if (stepId === 'step-film') nextBtn.disabled = true;
+            if (stepId === 'step-addons') nextBtn.innerText = "Продолжить";
+            if (stepId === 'step-phone') nextBtn.innerText = "Заказать";
+            
+            updateBottomBar();
+        }
+
+        function goBack(targetStep) {
+            if (targetStep === 1) showStep('step-device', 1);
+            else if (targetStep === 2) showStep('step-model', 2);
+            else if (targetStep === 3) { renderZones(); showStep('step-zone', 3); }
+            else if (targetStep === 3.5) { renderOtherServices(); showStep('step-other-service', 3.5); }
+            else if (targetStep === 4) {
+                if (state.device === 'Прочее') { renderOtherServices(); showStep('step-other-service', 3.5); }
+                else { renderZones(); showStep('step-zone', 3); }
+            }
+            else if (targetStep === 5) showStep('step-film', 4);
+            else if (targetStep === 6) { renderAddons(); showStep('step-addons', 5); }
+            else if (targetStep === 7) showStep('step-datetime', 6);
+        }
+
+        function selectDevice(device, el) {
+            state.device = device; state.model = null; state.zone = null;
+            state.film = null; state.thickness = null; state.totalPrice = 0; state.addons = [];
+            
+            const modelInput = document.getElementById('model-input');
+            if (device === 'Ноутбук') modelInput.placeholder = "Например, MacBook Air M2";
+            else if (device === 'Планшет') modelInput.placeholder = "Например, iPad Pro 11";
+            else if (device === 'Смарт-часы') modelInput.placeholder = "Например, Apple Watch Ultra";
+            else if (device === 'Телефон') modelInput.placeholder = "Например, iPhone 15 Pro";
+            else modelInput.placeholder = "Например, Nintendo Switch";
+            modelInput.value = "";
+
+            handleSelect(el, () => {
+                if (device === 'Прочее') { renderOtherServices(); showStep('step-other-service', 3.5); }
+                else { showStep('step-model', 2); }
+            });
+        }
+
+        function renderZones() {
+            const list = document.getElementById('zone-list');
+            list.innerHTML = '';
+            ZONES[state.device].forEach(zone => {
+                const prices = BASE_PRICES[state.device][zone];
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${zone}</span><span class="zone-price">${prices[0]} / ${prices[1]} BYN</span>`;
+                div.onclick = () => {
+                    state.zone = zone;
+                    handleSelect(div, () => { renderFilms(); showStep('step-film', 4); });
+                };
+                list.appendChild(div);
+            });
+        }
+
+        function renderOtherServices() {
+            const list = document.getElementById('other-service-list');
+            list.innerHTML = '';
+            OTHER_SERVICES.forEach(srv => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${srv.name}</span><span class="zone-price">${srv.price} BYN</span>`;
+                div.onclick = () => {
+                    state.zone = srv.name;
+                    handleSelect(div, () => {
+                        if (srv.name === 'Кейс наушников') { renderFilms(); showStep('step-film', 4); }
+                        else { showStep('step-model', 2); }
+                    });
+                };
+                list.appendChild(div);
+            });
+        }
+
+        function renderFilms() {
+            const list = document.getElementById('film-list');
+            list.innerHTML = '';
+            let allowVinyl = true;
+            
+            if (["Ноутбук", "Планшет", "Смарт-часы"].includes(state.device)) allowVinyl = false;
+            if (["Экран", "Верхняя крышка", "Нижняя крышка", "TouchPad", "Линзы", "Автомультимедиа"].includes(state.zone)) allowVinyl = false;
+
+            if (allowVinyl) {
+                let divV = document.createElement('div');
+                divV.className = 'list-item';
+                divV.innerHTML = `<span>Виниловая</span>`;
+                divV.onclick = () => {
+                    state.film = "ВИНИЛОВАЯ ПЛЕНКА";
+                    state.thickness = null;
+                    document.getElementById('next-btn').disabled = true; 
+                    const p = BASE_PRICES[state.device][state.zone];
+                    handleSelect(divV, () => renderThickness(p[0], p[1]));
+                };
+                list.appendChild(divV);
+            }
+
+            let divP = document.createElement('div');
+            divP.className = 'list-item';
+            divP.innerHTML = `<span>Полиуретановая</span>`;
+            divP.onclick = () => {
+                state.film = "ПОЛЕУРЕТАНОВАЯ ПЛЕНКА";
+                state.thickness = null;
+                document.getElementById('next-btn').disabled = true;
+                const p = BASE_PRICES[state.device][state.zone];
+                handleSelect(divP, () => renderThickness(p[0], p[1]));
+            };
+            list.appendChild(divP);
+
+            document.getElementById('thickness-list').classList.add('hidden');
+            document.getElementById('next-btn').disabled = true;
+        }
+
+        function renderThickness(stdPrice, premPrice) {
+            const container = document.getElementById('thickness-container');
+            container.innerHTML = '';
+            
+            let options = [
+                { name: "Стандартная", price: stdPrice },
+                { name: "Премиум / Противоударная", price: premPrice }
+            ];
+            if (state.zone === "Автомультимедиа") options = [{ name: "Стандарт / Премиум", price: stdPrice }];
+
+            options.forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${opt.name}</span><span class="addon-price">${opt.price} BYN</span>`;
+                div.onclick = () => {
+                    state.thickness = opt.name;
+                    state.basePrice = opt.price;
+                    state.totalPrice = opt.price;
+                    document.getElementById('next-btn').disabled = false; 
+                    
+                    Array.from(container.children).forEach(c => c.classList.remove('active'));
+                    div.classList.add('active');
+                    updateBottomBar();
+                };
+                container.appendChild(div);
+            });
+            document.getElementById('thickness-list').classList.remove('hidden');
+        }
+
+        function renderAddons() {
+            const list = document.getElementById('addons-list');
+            list.innerHTML = '';
+            state.addons = []; 
+            state.totalPrice = state.basePrice; 
+            
+            let availableAddons = [
+                { name: "Чистка динамиков", price: 15 },
+                { name: "Оклейка линз", price: 20 },
+                { name: "Оклейка торцов", price: 20 }
+            ];
+
+            if (["Линзы"].includes(state.zone)) availableAddons = availableAddons.filter(a => a.name !== "Оклейка линз");
+            if (state.zone === "Торцы") availableAddons = availableAddons.filter(a => a.name !== "Оклейка торцов");
+            if (state.zone === "Кейс наушников") availableAddons = availableAddons.filter(a => a.name !== "Оклейка линз" && a.name !== "Оклейка торцов");
+            if (state.zone === "Автомультимедиа") availableAddons = availableAddons.filter(a => !["Чистка динамиков", "Оклейка торцов", "Оклейка линз"].includes(a.name));
+            if (state.device === "Смарт-часы") availableAddons = availableAddons.filter(a => a.name !== "Оклейка линз" && a.name !== "Оклейка торцов");
+
+            if (availableAddons.length === 0) {
+                list.innerHTML = '<div class="subtitle" style="text-align:center; padding: 20px 0;">Для этой услуги доп. опции не требуются.</div>';
+            } else {
+                availableAddons.forEach(addon => {
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+                    div.innerHTML = `<span>${addon.name}</span><span class="addon-price">+${addon.price} BYN</span>`;
+                    
+                    div.onclick = () => {
+                        div.classList.toggle('active');
+                        const idx = state.addons.findIndex(a => a.name === addon.name);
+                        if (idx > -1) {
+                            state.totalPrice -= addon.price;
+                            state.addons.splice(idx, 1);
+                        } else {
+                            state.totalPrice += addon.price;
+                            state.addons.push(addon);
+                        }
+                        updateBottomBar();
+                    };
+                    list.appendChild(div);
+                });
+            }
+            updateBottomBar();
+        }
+
+        function nextStep() {
+            if (state.step === 2) { 
+                if (!state.model) return tg.showAlert("Введите модель устройства");
+                if (state.device === 'Прочее') { renderFilms(); showStep('step-film', 4); }
+                else { renderZones(); showStep('step-zone', 3); }
+            }
+            else if (state.step === 4) { 
+                if (!state.thickness) return tg.showAlert("Выберите толщину пленки");
+                renderAddons(); showStep('step-addons', 5);
+            }
+            else if (state.step === 5) { 
+                showStep('step-datetime', 6);
+            }
+            else if (state.step === 6) { 
+                if (!state.date || !state.time || !state.point) return tg.showAlert("Пожалуйста, выберите дату, время и точку");
+                showStep('step-phone', 7);
+            }
+            else if (state.step === 7) { 
+                if (!state.phone) return tg.showAlert("Введите номер телефона");
+                submitOrder();
+            }
+        }
+
+        function updateBottomBar() {
+            document.getElementById('total-price').innerText = state.totalPrice + " BYN";
+        }
+
+        function submitOrder() {
+            const data = {
+                device: state.device,
+                model: state.model || "Не указана",
+                zone: state.zone,
+                film: state.film || "Не требуется",
+                thickness: state.thickness || "-",
+                addons: state.addons.map(a => a.name).join(", ") || "Нет",
+                date: state.date,
+                time: state.time,
+                point: state.point,
+                price: state.totalPrice,
+                phone: state.phone
+            };
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        }
+    </script>
+</body>
+</html>
